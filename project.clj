@@ -6,5 +6,6 @@
   :dependencies [[org.clojure/clojure "1.10.0-beta3"]]
   :plugins [[lein-sub "0.3.0"]]
   :sub ["modules/aleph"
-        "modules/bidi"]
+        "modules/bidi"
+        "modules/handler"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
