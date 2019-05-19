@@ -7,5 +7,6 @@
   :plugins [[lein-sub "0.3.0"]]
   :sub ["modules/aleph"
         "modules/bidi"
-        "modules/handler"]
+        "modules/handler"
+        "modules/middleware"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
