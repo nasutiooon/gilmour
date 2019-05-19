@@ -21,9 +21,5 @@
     (assoc this :handler nil)))
 
 (defn make-router
-  ([routes]
-   (map->Router {:routes routes}))
-  ([routes {:keys [resources not-found-fn]}]
-   (map->Router {:routes       routes
-                 :resources    resources
-                 :not-found-fn not-found-fn})))
+  [opts]
+  (map->Router opts))

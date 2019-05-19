@@ -19,7 +19,7 @@
     (assoc this :server nil)))
 
 (defn make-http-server
-  ([config]
-   (map->HttpServer {:config config}))
-  ([config handler]
-   (map->HttpServer {:config config :handler {:handler handler}})))
+  [config opts]
+  (-> opts
+      (assoc :config config)
+      (map->HttpServer)))

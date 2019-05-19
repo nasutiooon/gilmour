@@ -28,5 +28,7 @@
     (assoc this :middleware nil)))
 
 (defn make-middleware
-  [config entries]
-  (map->Middleware {:config config :entries entries}))
+  [config opts]
+  (-> opts
+      (assoc :config config)
+      (map->Middleware)))

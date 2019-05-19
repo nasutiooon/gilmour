@@ -4,18 +4,21 @@
    [ragtime.jdbc :as ragtime.j]
    [ragtime.repl :as ragtime.r]))
 
-(defrecord Ragtime [db-spec datasource path datastore migrations]
+(defrecord Ragtime [db config datastore migrations]
   c/Lifecycle
   (start [this]
-    (let [datastore  (ragtime.j/load-resources path)
-          migrations (ragtime.j/sql-database (or datasource db-spec))]
+    (let [datastore  (ragtime.j/load-resources (:path config))
+          migrations (ragtime.j/sql-database
+                      (if-let [datasource (:datasource db)]
+                        {:datasource datasource}
+                        (:config db)))]
       (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
     (assoc this :datastore nil :migrations nil)))
 
 (defn make-ragtime
   [config]
-  (map->Ragtime config))
+  (map->Ragtime {:config config}))
 
 (defn migrate
   [ragtime]
