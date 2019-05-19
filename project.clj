@@ -8,5 +8,6 @@
   :sub ["modules/aleph"
         "modules/bidi"
         "modules/handler"
-        "modules/middleware"]
+        "modules/middleware"
+        "modules/jwt_encoder"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
