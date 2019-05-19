@@ -5,7 +5,7 @@
    [com.stuartsierra.component :as c]
    [ring.util.http-response :refer [not-found]]))
 
-(defrecord Router [routes resources handler]
+(defrecord Router [routes resources not-found-fn handler]
   b/RouteProvider
   (routes [_] routes)
 
@@ -15,7 +15,7 @@
                    (if resources
                      (make-handler ["" routes] resources)
                      (make-handler ["" routes]))
-                   (constantly (not-found)))]
+                   (or not-found-fn (constantly (not-found))))]
       (assoc this :handler handler)))
   (stop [this]
     (assoc this :handler nil)))
@@ -23,5 +23,7 @@
 (defn make-router
   ([routes]
    (map->Router {:routes routes}))
-  ([routes resources]
-   (map->Router {:routes routes :resources resources})))
+  ([routes {:keys [resources not-found-fn]}]
+   (map->Router {:routes       routes
+                 :resources    resources
+                 :not-found-fn not-found-fn})))
