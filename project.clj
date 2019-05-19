@@ -10,5 +10,6 @@
         "modules/handler"
         "modules/middleware"
         "modules/jwt_encoder"
-        "modules/datomic"]
+        "modules/datomic"
+        "modules/hikari"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
