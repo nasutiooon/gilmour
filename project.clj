@@ -9,5 +9,6 @@
         "modules/bidi"
         "modules/handler"
         "modules/middleware"
-        "modules/jwt_encoder"]
+        "modules/jwt_encoder"
+        "modules/datomic"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
