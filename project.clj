@@ -11,5 +11,6 @@
         "modules/middleware"
         "modules/jwt_encoder"
         "modules/datomic"
-        "modules/hikari"]
+        "modules/hikari"
+        "modules/ragtime"]
   :aliases {"deploy-all" ["sub" "deploy" "clojars"]})
