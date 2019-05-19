@@ -48,15 +48,18 @@
   []
   (map->DatomicConnection {}))
 
-(defrecord DatomicConformer [datomic path result]
+(defrecord DatomicConformer [datomic path norm-map]
   c/Lifecycle
   (start [this]
-    (let [norm-map (-> path slurp edn/read-string)
-          result   (ensure-conforms (:conn datomic) norm-map)]
-      (assoc this :result result)))
+    (let [norm-map (-> path slurp edn/read-string)]
+      (assoc this :norm-map norm-map)))
   (stop [this]
     (assoc this :resut nil)))
 
 (defn make-datomic-conformer
   [path]
   (map->DatomicConformer {:path path}))
+
+(defn conform
+  [{:keys [datomic norm-map]}]
+  (ensure-conforms (:conn datomic) norm-map))
