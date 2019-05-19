@@ -17,5 +17,10 @@
     (assoc this :handler nil)))
 
 (defn make-handler
-  []
-  (map->Handler {}))
+  ([handler middleware]
+   (map->Handler {:request-handler    {:handler handler}
+                  :request-middleware {:middlware middleware}}))
+  ([handler]
+   (map->Handler {:request-handler {:handler handler}}))
+  ([]
+   (map->Handler {})))
