@@ -12,7 +12,7 @@
   (start [this]
     (let [middleware (:middleware request-middleware identity)
           handler    (:handler request-handler default-handler)]
-      (middleware handler)))
+      (assoc this :handler (middleware handler))))
   (stop [this]
     (assoc this :handler nil)))
 
