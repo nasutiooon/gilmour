@@ -37,3 +37,18 @@
 (defn make-asymetric-signer
   [config]
   (map->AsymetricSigner {:config config}))
+
+(def sha-signer-algs
+  #{:hs256 :hs512})
+
+(def asymetric-signer-algs
+  #{:es256 :es512 :ps256 :ps512 :rs256 :rs512})
+
+(defn make-jwt-encoder
+  [{:keys [algorithm] :as config}]
+  (cond
+    (sha-signer-algs algorithm)
+    (make-sha-signer config)
+
+    (asymetric-signer-algs algorithm)
+    (make-asymetric-signer config)))
