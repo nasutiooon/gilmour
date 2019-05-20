@@ -39,7 +39,7 @@
 (defrecord DatomicConnection [impl conn]
   c/Lifecycle
   (start [this]
-    (assoc this :conn (d/connect (:uri impl))))
+    (assoc this :conn (d/connect (-> impl :config :uri))))
   (stop [this]
     (when conn (d/release conn))
     (assoc this :conn nil)))
