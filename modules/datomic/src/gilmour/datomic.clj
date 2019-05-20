@@ -48,7 +48,7 @@
   []
   (map->DatomicConnection {}))
 
-(defrecord DatomicConformer [config datomic norm-map]
+(defrecord DatomicConformer [config db norm-map]
   c/Lifecycle
   (start [this]
     (let [norm-map (-> config :path slurp edn/read-string)]
@@ -61,5 +61,5 @@
   (map->DatomicConformer {:config config}))
 
 (defn conform
-  [{:keys [datomic norm-map]}]
-  (ensure-conforms (:conn datomic) norm-map))
+  [{:keys [db norm-map]}]
+  (ensure-conforms (:conn db) norm-map))
