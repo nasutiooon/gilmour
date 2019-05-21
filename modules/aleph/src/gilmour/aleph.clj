@@ -8,10 +8,16 @@
   {:status 200
    :body   "No request handler found in `gilmour.aleph.HttpServer`"})
 
-(defrecord HttpServer [config handler server]
+(defn- search-handler
+  [component]
+  (->> (vals component)
+       (keep :handler)
+       (first)))
+
+(defrecord HttpServer [config server]
   c/Lifecycle
   (start [this]
-    (let [handler (:handler handler default-handler)
+    (let [handler (or (search-handler this) default-handler)
           server  (start-server handler config)]
       (assoc this :server server)))
   (stop [this]
