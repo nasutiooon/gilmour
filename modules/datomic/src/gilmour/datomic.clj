@@ -5,30 +5,30 @@
    [datomic.api :as d]
    [io.rkn.conformity :refer [ensure-conforms]]))
 
-(defrecord EphemeralDatomic [config]
+(defrecord EphemeralDatomic [uri]
   c/Lifecycle
   (start [this]
-    (d/create-database (:uri config))
+    (d/create-database uri)
     this)
   (stop [this]
-    (d/delete-database (:uri config))
+    (d/delete-database uri)
     this))
 
 (defn make-ephemeral-datomic
   [config]
-  (map->EphemeralDatomic {:config config}))
+  (map->EphemeralDatomic config))
 
-(defrecord DurableDatomic [config]
+(defrecord DurableDatomic [uri]
   c/Lifecycle
   (start [this]
-    (d/create-database (:uri config))
+    (d/create-database uri)
     this)
   (stop [this]
     this))
 
 (defn make-durable-datomic
   [config]
-  (map->DurableDatomic {:config config}))
+  (map->DurableDatomic config))
 
 (defn make-datomic
   [{:keys [temporary?] :as config}]
@@ -56,17 +56,17 @@
   []
   (map->DatomicConnection {}))
 
-(defrecord DatomicConformer [config norm-map]
+(defrecord DatomicConformer [path norm-map]
   c/Lifecycle
   (start [this]
-    (let [norm-map (-> config :path slurp edn/read-string)]
+    (let [norm-map (-> path slurp edn/read-string)]
       (assoc this :norm-map norm-map)))
   (stop [this]
-    (assoc this :resut nil)))
+    (assoc this :norm-map nil)))
 
 (defn make-datomic-conformer
   [config]
-  (map->DatomicConformer {:config config}))
+  (map->DatomicConformer config))
 
 (defn- search-conn
   [component]
@@ -76,6 +76,4 @@
 
 (defn conform
   [{:keys [norm-map] :as datomic}]
-  (let [conn (or (search-conn datomic)
-                 (throw (ex-info "Can't find Datomic connection" {})))]
-    (ensure-conforms conn norm-map)))
+  (ensure-conforms (search-conn datomic) norm-map))
