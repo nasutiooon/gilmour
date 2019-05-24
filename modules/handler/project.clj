@@ -1,4 +1,4 @@
-(defproject gilmour/handler "0.1.3"
+(defproject gilmour/handler "0.1.4"
   :description "Handler as component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/handler"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
