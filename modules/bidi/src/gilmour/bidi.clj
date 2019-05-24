@@ -23,5 +23,5 @@
     (assoc this :routes nil :handler nil)))
 
 (defn make-router
-  [opts]
-  (map->Router opts))
+  [config]
+  (map->Router config))
