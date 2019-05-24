@@ -3,21 +3,18 @@
    [aleph.http :refer [start-server]]
    [com.stuartsierra.component :as c]))
 
-(defn- default-handler
-  [_]
-  {:status 200
-   :body   "No request handler found in `gilmour.aleph.HttpServer`"})
-
 (defn- search-handler
   [component]
-  (->> (vals component)
-       (keep :handler)
-       (first)))
+  (or (:handler component)
+      (->> (vals component)
+           (keep :handler)
+           (first))
+      (throw (ex-info "aleph http server requires a handler" {}))))
 
 (defrecord HttpServer [config server]
   c/Lifecycle
   (start [this]
-    (let [handler (or (search-handler this) default-handler)
+    (let [handler (search-handler this)
           server  (start-server handler config)]
       (assoc this :server server)))
   (stop [this]
