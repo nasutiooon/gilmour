@@ -20,15 +20,13 @@
        (map (comp coerce (partial substitute component)))
        (apply comp)))
 
-(defrecord Middleware [config entries middleware]
+(defrecord Middleware [entries wrapper]
   c/Lifecycle
   (start [this]
-    (assoc this :middleware (compose this entries)))
+    (assoc this :wrapper (compose this entries)))
   (stop [this]
-    (assoc this :middleware nil)))
+    (assoc this :wrapper nil)))
 
 (defn make-middleware
-  [config opts]
-  (-> opts
-      (assoc :config config)
-      (map->Middleware)))
+  [config]
+  (map->Middleware config))
