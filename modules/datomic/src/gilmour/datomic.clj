@@ -36,10 +36,18 @@
     (make-ephemeral-datomic config)
     (make-durable-datomic config)))
 
-(defrecord DatomicConnection [impl conn]
+(defn- search-uri
+  [component]
+  (->> (vals component)
+       (keep :uri)
+       (first)))
+
+(defrecord DatomicConnection [conn]
   c/Lifecycle
   (start [this]
-    (assoc this :conn (d/connect (-> impl :config :uri))))
+    (let [uri (or (search-uri this)
+                  (throw (ex-info "Can't find uri for Datomic" {})))]
+      (assoc this :conn (d/connect (search-uri this)))))
   (stop [this]
     (when conn (d/release conn))
     (assoc this :conn nil)))
@@ -48,7 +56,7 @@
   []
   (map->DatomicConnection {}))
 
-(defrecord DatomicConformer [config db norm-map]
+(defrecord DatomicConformer [config norm-map]
   c/Lifecycle
   (start [this]
     (let [norm-map (-> config :path slurp edn/read-string)]
@@ -60,6 +68,14 @@
   [config]
   (map->DatomicConformer {:config config}))
 
+(defn- search-conn
+  [component]
+  (->> (vals component)
+       (keep :conn)
+       (first)))
+
 (defn conform
-  [{:keys [db norm-map]}]
-  (ensure-conforms (:conn db) norm-map))
+  [{:keys [norm-map] :as datomic}]
+  (let [conn (or (search-conn datomic)
+                 (throw (ex-info "Can't find Datomic connection" {})))]
+    (ensure-conforms conn norm-map)))
