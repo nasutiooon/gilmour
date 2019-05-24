@@ -3,10 +3,10 @@
    [hikari-cp.core :as hikari]
    [com.stuartsierra.component :as c]))
 
-(defrecord Hikari [datasource]
+(defrecord Hikari [db-spec datasource]
   c/Lifecycle
   (start [this]
-    (assoc this :datasource (hikari/make-datasource this)))
+    (assoc this :datasource (hikari/make-datasource db-spec)))
   (stop [this]
     (when datasource (hikari/close-datasource datasource))
     (assoc this :datasource nil)))
