@@ -8,35 +8,35 @@
   (encode [this data])
   (decode [this data]))
 
-(defrecord SHASigner [config]
+(defrecord SHASigner [algorithm secret]
   JwtEncoder
   (encode [_ data]
-    (jwt/sign data (:secret config) {:alg (:algorithm config)}))
+    (jwt/sign data secret {:alg algorithm}))
   (decode [_ data]
-    (jwt/unsign data (:secret config) {:alg (:algorithm config)})))
+    (jwt/unsign data secret {:alg algorithm})))
 
 (defn make-sha-signer
   [config]
-  (map->SHASigner {:config config}))
+  (map->SHASigner config))
 
-(defrecord AsymetricSigner [config public-key private-key]
+(defrecord AsymetricSigner [algorithm keypair public-key private-key]
   JwtEncoder
   (encode [_ data]
-    (jwt/sign data public-key {:alg (:algorithm config)}))
+    (jwt/sign data private-key {:alg algorithm}))
   (decode [_ data]
-    (jwt/unsign data private-key {:alg (:algorithm config)}))
+    (jwt/unsign data public-key {:alg algorithm}))
 
   c/Lifecycle
   (start [this]
-    (let [public-key  (-> config :keypair :public-key keys/public-key)
-          private-key (-> config :keypair :private-key keys/private-key)]
+    (let [public-key  (keys/public-key (:public-key keypair))
+          private-key (keys/private-key (:private-key keypair))]
       (assoc this :public-key public-key :private-key private-key)))
   (stop [this]
     (assoc this :public-key nil :private-key nil)))
 
 (defn make-asymetric-signer
   [config]
-  (map->AsymetricSigner {:config config}))
+  (map->AsymetricSigner config))
 
 (def sha-signer-algs
   #{:hs256 :hs512})
