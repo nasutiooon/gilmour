@@ -2,17 +2,25 @@
   (:require
    [com.stuartsierra.component :as c]))
 
-(defn- default-handler
-  [_]
-  {:status 200
-   :body   "No request handler found in `gilmour.handler.Handler`"})
+(defn- search-wrapper
+  [component]
+  (->> (vals component)
+       (keep :wrapper)
+       (first)))
 
-(defrecord Handler [request-middleware request-handler handler]
+(defn- search-handler
+  [component]
+  (->> (vals component)
+       (keep :handler)
+       (first)))
+
+(defrecord Handler [handler]
   c/Lifecycle
   (start [this]
-    (let [middleware (:middleware request-middleware identity)
-          handler    (:handler request-handler default-handler)]
-      (assoc this :handler (middleware handler))))
+    (let [wrapper (or (search-wrapper this) identity)
+          handler (or (search-handler this)
+                      (throw (ex-info "Can't find handler for Handler" {})))]
+      (assoc this :handler (wrapper handler))))
   (stop [this]
     (assoc this :handler nil)))
 
