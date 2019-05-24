@@ -11,21 +11,21 @@
                (first)
                (hash-map :datasource))
       (->> (vals component)
-           (keep :config)
+           (keep :db-spec)
            (first))))
 
-(defrecord Ragtime [config datastore migrations]
+(defrecord Ragtime [path datastore migrations]
   c/Lifecycle
   (start [this]
     (let [datastore  (ragtime.j/sql-database (search-datastore this))
-          migrations (ragtime.j/load-resources (:path config))]
+          migrations (ragtime.j/load-resources path)]
       (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
     (assoc this :datastore nil :migrations nil)))
 
 (defn make-ragtime
   [config]
-  (map->Ragtime {:config config}))
+  (map->Ragtime config))
 
 (defn migrate!
   [ragtime]
