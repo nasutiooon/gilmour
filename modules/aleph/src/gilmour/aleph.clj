@@ -8,13 +8,14 @@
   (or (:handler component)
       (->> (vals component)
            (keep :handler)
-           (first))
-      (throw (ex-info "aleph http server requires a handler" {}))))
+           (first))))
 
 (defrecord HttpServer [config server]
   c/Lifecycle
   (start [this]
-    (let [handler (search-handler this)
+    (let [handler (or
+                   (search-handler this)
+                   (throw (ex-info "aleph http server requires a handler" {})))
           server  (start-server handler config)]
       (assoc this :server server)))
   (stop [this]
