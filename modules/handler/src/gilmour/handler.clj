@@ -25,5 +25,5 @@
     (assoc this :handler nil)))
 
 (defn make-handler
-  [opts]
-  (map->Handler opts))
+  []
+  (map->Handler {}))
