@@ -1,4 +1,4 @@
-(defproject gilmour/ragtime "0.1.2"
+(defproject gilmour/ragtime "0.1.3"
   :description "Ragtime as component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/ragtime"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
