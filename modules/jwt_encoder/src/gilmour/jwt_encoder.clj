@@ -19,7 +19,7 @@
   [config]
   (map->SHASigner config))
 
-(defrecord AsymetricSigner [algorithm keypair public-key private-key]
+(defrecord AsymetricSigner [algorithm password keypair public-key private-key]
   JwtEncoder
   (encode [_ data]
     (jwt/sign data private-key {:alg algorithm}))
@@ -29,7 +29,9 @@
   c/Lifecycle
   (start [this]
     (let [public-key  (keys/public-key (:public-key keypair))
-          private-key (keys/private-key (:private-key keypair))]
+          private-key (if password
+                        (keys/private-key (:private-key keypair) password)
+                        (keys/private-key (:private-key keypair)))]
       (assoc this :public-key public-key :private-key private-key)))
   (stop [this]
     (assoc this :public-key nil :private-key nil)))
