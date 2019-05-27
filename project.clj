@@ -14,7 +14,8 @@
         "modules/jwt_encoder"
         "modules/datomic"
         "modules/hikari"
-        "modules/ragtime"]
+        "modules/ragtime"
+        "modules/ring"]
   :deploy-repositories [["clojars" {:url      "https://clojars.org/repo"
                                     :username :env/clojars_user
                                     :password :env/clojars_pass}]]
