@@ -2,13 +2,13 @@
   (:require
    [aleph.http :refer [start-server]]
    [com.stuartsierra.component :as c]
-   [gilmour.ring :as ring]))
+   [gilmour.ring :as g.ring]))
 
 (defn- search-handler
   [component]
   (->> (vals component)
-       (filter (partial satisfies? ring/RequestHandler))
-       (map ring/request-handler)
+       (filter (partial satisfies? g.ring/RequestHandler))
+       (map g.ring/request-handler)
        (first)))
 
 (defrecord HttpServer [server]

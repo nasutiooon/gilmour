@@ -3,7 +3,7 @@
    [bidi.bidi :as b]
    [bidi.ring :refer [make-handler]]
    [com.stuartsierra.component :as c]
-   [gilmour.ring :as ring]
+   [gilmour.ring :as g.ring]
    [ring.util.http-response :refer [not-found]]))
 
 (defprotocol ResourceProvider
@@ -33,7 +33,7 @@
   (stop [this]
     (assoc this :request-routes nil :request-resources nil))
 
-  ring/RequestHandler
+  g.ring/RequestHandler
   (request-handler [_]
     (some-fn
      (make-handler ["" request-routes] request-resources)
