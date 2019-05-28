@@ -36,7 +36,7 @@
 (defn restart!
   []
   (stop!)
-  (let [result (refresh :after gilmour.dev.repl/start!)]
+  (let [result (refresh :after 'gilmour.dev.repl/start!)]
     (if (instance? Throwable result)
       (throw result)
       result)))
