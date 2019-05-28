@@ -1,4 +1,4 @@
-(defproject gilmour/dev "0.1.0"
+(defproject gilmour/dev "0.1.1"
   :description "Development utilities for component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/dev"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"

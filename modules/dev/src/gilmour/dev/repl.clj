@@ -33,7 +33,7 @@
   (swap! system #(when % (c/stop %)))
   ::ok)
 
-(defn reset!
+(defn restart!
   []
   (stop!)
   (let [result (refresh :after gilmour.dev.repl/start!)]
