@@ -1,4 +1,4 @@
-(ns gilmour.middleware)
+(ns gilmour.sql)
 
 (defprotocol SQLPool
   (pool [this]))

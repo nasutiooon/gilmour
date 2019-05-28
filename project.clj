@@ -6,8 +6,8 @@
   :dependencies [[org.clojure/clojure "1.10.0-beta3"]]
   :managed-dependencies [[org.clojure/clojure "1.10.0-beta3"]
                          [com.stuartsierra/component "0.4.0"]
-                         [gilmour/ring "0.1.2"]
-                         [gilmour/sql "0.1.0"]]
+                         [gilmour/ring "0.1.3"]
+                         [gilmour/sql "0.1.1"]]
   :plugins [[lein-sub "0.3.0"]]
   :sub ["modules/aleph"
         "modules/bidi"
