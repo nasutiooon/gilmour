@@ -7,11 +7,11 @@
   :managed-dependencies [[org.clojure/clojure "1.10.0-beta3"]
                          [com.stuartsierra/component "0.4.0"]
                          [gilmour/ring "0.1.2"]
-                         [gilmour/hikari "0.1.5"]
                          [gilmour/sql "0.1.0"]]
   :plugins [[lein-sub "0.3.0"]]
   :sub ["modules/aleph"
         "modules/bidi"
+        "modules/dev"
         "modules/handler"
         "modules/middleware"
         "modules/jwt_encoder"
