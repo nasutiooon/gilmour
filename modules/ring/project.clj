@@ -1,5 +1,5 @@
-(defproject gilmour/ring "0.1.1"
-  :description "Ring as component"
+(defproject gilmour/ring "0.1.2"
+  :description "Ring related things as component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/ring"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url  "https://www.eclipse.org/legal/epl-2.0/"}

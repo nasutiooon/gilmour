@@ -27,3 +27,30 @@
 (defn make-ring-head
   []
   (map->RingHead {}))
+
+(defn- substitute
+  [component entry]
+  (if (vector? entry)
+    (replace {:component component} entry)
+    entry))
+
+(defn- coerce
+  [entry]
+  (if (vector? entry)
+    #(apply (first entry) % (rest entry))
+    entry))
+
+(defn- compose
+  [component entries]
+  (->> entries
+       (map (comp coerce (partial substitute component)))
+       (apply comp)))
+
+(defrecord RingMiddleware [entries wrapper]
+  RequestMiddleware
+  (request-middleware [this]
+    (compose this entries)))
+
+(defn make-ring-middleware
+  [config]
+  (map->RingMiddleware config))
