@@ -7,7 +7,8 @@
   :managed-dependencies [[org.clojure/clojure "1.10.0-beta3"]
                          [com.stuartsierra/component "0.4.0"]
                          [gilmour/ring "0.1.2"]
-                         [gilmour/hikari "0.1.5"]]
+                         [gilmour/hikari "0.1.5"]
+                         [gilmour/sql "0.1.0"]]
   :plugins [[lein-sub "0.3.0"]]
   :sub ["modules/aleph"
         "modules/bidi"
@@ -17,7 +18,8 @@
         "modules/datomic"
         "modules/hikari"
         "modules/ragtime"
-        "modules/ring"]
+        "modules/ring"
+        "modules/sql"]
   :deploy-repositories [["clojars" {:url      "https://clojars.org/repo"
                                     :username :env/clojars_user
                                     :password :env/clojars_pass}]]

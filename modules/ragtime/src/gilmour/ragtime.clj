@@ -1,7 +1,7 @@
 (ns gilmour.ragtime
   (:require
    [com.stuartsierra.component :as c]
-   [gilmour.hikari :as g.hikari]
+   [gilmour.sql :as g.sql]
    [ragtime.jdbc :as ragtime.j]
    [ragtime.repl :as ragtime.r]))
 
@@ -9,13 +9,13 @@
   [component]
   (let [ms (vals component)]
     (or (some->> ms
-                 (filter (partial satisfies? g.hikari/SQLPool))
-                 (map g.hikari/pool)
+                 (filter (partial satisfies? g.sql/SQLPool))
+                 (map g.sql/pool)
                  (first)
                  (hash-map :datasource))
         (->> ms
-             (filter (partial satisfies? g.hikari/SQLSpec))
-             (map g.hikari/db-spec)
+             (filter (partial satisfies? g.sql/SQLSpec))
+             (map g.sql/db-spec)
              (first)))))
 
 (defrecord Ragtime [path datastore migrations]

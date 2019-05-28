@@ -1,13 +1,8 @@
 (ns gilmour.hikari
   (:require
-   [hikari-cp.core :as hikari]
-   [com.stuartsierra.component :as c]))
-
-(defprotocol SQLPool
-  (pool [this]))
-
-(defprotocol SQLSpec
-  (db-spec [this]))
+   [com.stuartsierra.component :as c]
+   [gilmour.sql :as sql]
+   [hikari-cp.core :as hikari]))
 
 (defrecord Hikari [db-spec datasource]
   c/Lifecycle
@@ -17,10 +12,10 @@
     (when datasource (hikari/close-datasource datasource))
     (assoc this :datasource nil))
 
-  SQLPool
+  sql/SQLPool
   (pool [_] datasource)
 
-  SQLSpec
+  sql/SQLSpec
   (db-spec [_] db-spec))
 
 (defn make-hikari
