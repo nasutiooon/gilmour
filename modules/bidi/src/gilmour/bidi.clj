@@ -15,6 +15,13 @@
        (filter (partial satisfies? b/RouteProvider))
        (filter (partial satisfies? ResourceProvider))))
 
+(defn search-middleware
+  [component]
+  (->> (vals component)
+       (filter (partial satisfies? g.ring/RequestMiddleware))
+       (map g.ring/request-middleware)
+       (apply comp)))
+
 (defrecord Router [request-routes request-resources not-found-handler handler]
   b/RouteProvider
   (routes [_] request-routes)
@@ -27,7 +34,12 @@
                              (map b/routes)
                              (reduce merge {}))
           req-resources (->> hooks
-                             (map resources)
+                             (map (juxt search-middleware resources))
+                             (map (fn [[mdw rscs]]
+                                    (reduce-kv (fn [m k rsc]
+                                                 (assoc m k (mdw rsc)))
+                                               {}
+                                               rscs)))
                              (reduce merge {}))]
       (assoc this :request-routes req-routes :request-resources req-resources)))
   (stop [this]
