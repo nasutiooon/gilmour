@@ -1,19 +1,22 @@
 (ns gilmour.aleph
   (:require
    [aleph.http :refer [start-server]]
-   [com.stuartsierra.component :as c]))
+   [com.stuartsierra.component :as c]
+   [gilmour.ring :as ring]))
 
 (defn- search-handler
   [component]
   (->> (vals component)
-       (keep :handler)
+       (filter (partial satisfies? ring/RequestHandler))
+       (map ring/request-handler)
        (first)))
 
 (defrecord HttpServer [server]
   c/Lifecycle
   (start [this]
     (let [handler (or (search-handler this)
-                      (throw (ex-info "aleph http server requires a handler" {})))
+                      (throw
+                       (ex-info "aleph http server requires a handler" {})))
           server  (start-server handler this)]
       (assoc this :server server)))
   (stop [this]

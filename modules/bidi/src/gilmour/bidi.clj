@@ -3,24 +3,41 @@
    [bidi.bidi :as b]
    [bidi.ring :refer [make-handler]]
    [com.stuartsierra.component :as c]
+   [gilmour.ring :as ring]
    [ring.util.http-response :refer [not-found]]))
 
-(defrecord Router [routes routes-fn resources-fn not-found-handler handler]
+(defprotocol ResourceProvider
+  (resources [this]))
+
+(defn- search-hooks
+  [component]
+  (->> (vals component)
+       (filter (partial satisfies? b/RouteProvider))
+       (filter (partial satisfies? ResourceProvider))))
+
+(defrecord Router [request-routes request-resources not-found-handler handler]
   b/RouteProvider
-  (routes [_] routes)
+  (routes [_] request-routes)
 
   c/Lifecycle
   (start [this]
-    (let [routes    (routes-fn this)
-          resources (when resources-fn (resources-fn this))
-          handler   (some-fn
-                     (if resources
-                       (make-handler ["" routes] resources)
-                       (make-handler ["" routes]))
-                     (or not-found-handler (constantly (not-found))))]
-      (assoc this :routes routes :handler handler)))
+    (let [hooks         (or (search-hooks this)
+                            (throw (ex-info "Bidi router requires a hook" {})))
+          req-routes    (->> hooks
+                             (map b/routes)
+                             (reduce merge {}))
+          req-resources (->> hooks
+                             (map resources)
+                             (reduce merge {}))]
+      (assoc this :request-routes req-routes :request-resources req-resources)))
   (stop [this]
-    (assoc this :routes nil :handler nil)))
+    (assoc this :request-routes nil :request-resources nil))
+
+  ring/RequestHandler
+  (request-handler [_]
+    (some-fn
+     (make-handler ["" request-routes] request-resources)
+     (or not-found-handler (constantly (not-found))))))
 
 (defn make-router
   [config]

@@ -1,4 +1,4 @@
-(defproject gilmour/aleph "0.1.7"
+(defproject gilmour/aleph "0.1.8"
   :description "Aleph as component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/aleph"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -8,4 +8,5 @@
   :parent-project {:path    "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :profiles {:dev {:dependencies [[org.clojure/clojure]
-                                  [com.stuartsierra/component]]}})
+                                  [com.stuartsierra/component]
+                                  [gilmour/ring]]}})

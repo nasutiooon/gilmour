@@ -5,6 +5,12 @@
    [datomic.api :as d]
    [io.rkn.conformity :refer [ensure-conforms]]))
 
+(defprotocol DatomicBlueprint
+  (uri [this]))
+
+(defprotocol Datomic
+  (conn [this]))
+
 (defrecord EphemeralDatomic [uri]
   c/Lifecycle
   (start [this]
@@ -12,7 +18,10 @@
     this)
   (stop [this]
     (d/delete-database uri)
-    this))
+    this)
+
+  DatomicBlueprint
+  (uri [_] uri))
 
 (defn make-ephemeral-datomic
   [config]
@@ -24,7 +33,10 @@
     (d/create-database uri)
     this)
   (stop [this]
-    this))
+    this)
+
+  DatomicBlueprint
+  (uri [_] uri))
 
 (defn make-durable-datomic
   [config]
@@ -39,18 +51,23 @@
 (defn- search-uri
   [component]
   (->> (vals component)
-       (keep :uri)
+       (filter (partial satisfies? DatomicBlueprint))
+       (map uri)
        (first)))
 
 (defrecord DatomicConnection [conn]
   c/Lifecycle
   (start [this]
     (let [uri (or (search-uri this)
-                  (throw (ex-info "Can't find uri for Datomic" {})))]
-      (assoc this :conn (d/connect (search-uri this)))))
+                  (throw
+                   (ex-info "Datomic connection requires a blueprint" {})))]
+      (assoc this :conn (d/connect uri))))
   (stop [this]
     (when conn (d/release conn))
-    (assoc this :conn nil)))
+    (assoc this :conn nil))
+
+  Datomic
+  (conn [_] conn))
 
 (defn make-datomic-connection
   []
@@ -71,7 +88,8 @@
 (defn- search-conn
   [component]
   (->> (vals component)
-       (keep :conn)
+       (filter (partial satisfies? Datomic))
+       (map conn)
        (first)))
 
 (defn conform
