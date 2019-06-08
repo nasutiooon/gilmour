@@ -14,7 +14,9 @@
 (defrecord HttpServer [server]
   c/Lifecycle
   (start [this]
-    (let [handler (or (search-handler this)
+    (let [handler (or (when-let [handler (:handler this)]
+                        (g.ring/request-handler handler))
+                      (search-handler this)
                       (throw
                        (ex-info "aleph http server requires a handler" {})))
           server  (start-server handler this)]

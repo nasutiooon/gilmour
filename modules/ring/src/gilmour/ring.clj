@@ -5,8 +5,16 @@
 (defprotocol RequestHandler
   (request-handler [this]))
 
+(extend-protocol RequestHandler
+  clojure.lang.AFunction
+  (request-handler [this] this))
+
 (defprotocol RequestMiddleware
   (request-middleware [this]))
+
+(extend-protocol RequestMiddleware
+  clojure.lang.AFunction
+  (request-handler [this] this))
 
 (defprotocol ExHandler
   (ex-handlers [this]))
@@ -21,16 +29,15 @@
 (defrecord RingHead []
   RequestHandler
   (request-handler [this]
-    (let [handler    (or (search-handler this)
-                         (throw (ex-info "Ring head requires a handler" {})))
+    (let [handler    (or (when-let [handler (:handler this)]
+                           (request-handler handler))
+                         (search-handler this)
+                         (throw (ex-info "ring head requires a handler" {})))
           middleware (->> (vals this)
                           (filter (partial satisfies? RequestMiddleware))
                           (map request-middleware)
                           (apply comp))]
-      (fn [request]
-        (let [new-handler (middleware handler)
-              new-request (assoc request :component this)]
-          (new-handler new-request))))))
+      (middleware handler))))
 
 (defn make-ring-head
   []
@@ -67,8 +74,10 @@
 (defrecord ExceptionManager []
   RequestHandler
   (request-handler [this]
-    (let [handler   (or (search-handler this)
-                        (throw (ex-info "Ring head requires a handler" {})))
+    (let [handler   (or (when-let [handler (:handler this)]
+                          (request-handler handler))
+                        (search-handler this)
+                        (throw (ex-info "ring head requires a handler" {})))
           catalogue (->> (vals this)
                          (filter (partial satisfies? ExHandler))
                          (map ex-handlers)
