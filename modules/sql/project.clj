@@ -1,4 +1,4 @@
-(defproject gilmour/sql "0.1.1"
+(defproject gilmour/sql "0.1.2"
   :description "Sql protocol"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/sql"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"

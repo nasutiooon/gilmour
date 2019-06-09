@@ -85,12 +85,13 @@
       (fn [request]
         (try
           (handler request)
-          (catch clojure.lang.ExceptionInfo e
-            (let [-ex-data   (ex-data e)
-                  kind       (:kind -ex-data)
+          (catch Exception e
+            (let [kind       (if (instance? clojure.lang.ExceptionInfo e)
+                               (-> e ex-data :kind)
+                               (type e))
                   ex-handler (get catalogue kind)]
               (if ex-handler
-                (ex-handler request e -ex-data)
+                (ex-handler e request)
                 (throw e)))))))))
 
 (defn make-exception-manager

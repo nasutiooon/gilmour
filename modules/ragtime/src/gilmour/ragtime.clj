@@ -14,7 +14,7 @@
                  (first)
                  (hash-map :datasource))
         (->> ms
-             (filter (partial satisfies? g.sql/SQLSpec))
+             (filter (partial satisfies? g.sql/SQLDb))
              (map g.sql/db-spec)
              (first)))))
 

@@ -1,7 +1,8 @@
 (ns gilmour.sql)
 
 (defprotocol SQLPool
-  (pool [this]))
+  (pool [this])
+  (pool-spec [this]))
 
-(defprotocol SQLSpec
+(defprotocol SQLDb
   (db-spec [this]))
