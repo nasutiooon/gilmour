@@ -54,3 +54,17 @@
 (defn make-router
   [config]
   (map->Router config))
+
+(defn path-for
+  ([router handler route-params]
+   (let [routes ["" (b/routes router)]]
+     (apply b/path-for routes handler (flatten (seq route-params)))))
+  ([router handler]
+   (path-for router handler {})))
+
+(defn match-route
+  ([router path options]
+   (let [routes ["" (b/routes router)]]
+     (apply b/match-route routes path (flatten (seq options)))))
+  ([router path]
+   (match-route router path {})))
