@@ -1,4 +1,4 @@
-(defproject gilmour "0.1.3"
+(defproject gilmour "0.1.4"
   :description "Collection of component"
   :url "https://github.com/nasutiooon/gilmour"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -19,7 +19,8 @@
         "modules/hikari"
         "modules/ragtime"
         "modules/ring"
-        "modules/sql"]
+        "modules/sql"
+        "modules/postgres"]
   :deploy-repositories [["clojars" {:url      "https://clojars.org/repo"
                                     :username :env/clojars_username
                                     :password :env/clojars_password}]]

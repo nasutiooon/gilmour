@@ -5,23 +5,23 @@
    [ragtime.jdbc :as ragtime.j]
    [ragtime.repl :as ragtime.r]))
 
-(defn- search-datastore
+(defn- search-source
   [component]
-  (let [ms (vals component)]
-    (or (some->> ms
-                 (filter (partial satisfies? g.sql/SQLPool))
-                 (map g.sql/pool)
-                 (first)
-                 (hash-map :datasource))
-        (->> ms
-             (filter (partial satisfies? g.sql/SQLDb))
-             (map g.sql/db-spec)
-             (first)))))
+  (or (some->> (vals component)
+               (filter (partial satisfies? g.sql/SQLPool))
+               (map g.sql/pool)
+               (first)
+               (hash-map :datasource))
+      (->> (vals component)
+           (filter (partial satisfies? g.sql/SQLDb))
+           (map g.sql/db-spec)
+           (first))
+      (:db-spec component)))
 
-(defrecord Ragtime [path datastore migrations]
+(defrecord Ragtime [path db-spec datastore migrations]
   c/Lifecycle
   (start [this]
-    (let [datastore  (ragtime.j/sql-database (search-datastore this))
+    (let [datastore  (ragtime.j/sql-database (search-source this))
           migrations (ragtime.j/load-resources path)]
       (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
