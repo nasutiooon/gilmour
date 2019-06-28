@@ -18,11 +18,11 @@
            (first))
       (:db-spec component)))
 
-(defrecord Ragtime [path db-spec datastore migrations]
+(defrecord Ragtime [migration-path db-spec datastore migrations]
   c/Lifecycle
   (start [this]
     (let [datastore  (ragtime.j/sql-database (search-source this))
-          migrations (ragtime.j/load-resources path)]
+          migrations (ragtime.j/load-resources migration-path)]
       (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
     (assoc this :datastore nil :migrations nil)))
