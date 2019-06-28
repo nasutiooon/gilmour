@@ -55,6 +55,17 @@
   [config]
   (map->Router config))
 
+(defrecord ResourceHooks [routes resources]
+  b/RouteProvider
+  (routes [_] routes)
+
+  ResourceProvider
+  (resources [_] resources))
+
+(defn make-resource-hooks
+  [config]
+  (map->ResourceHooks config))
+
 (defn path-for
   ([router handler route-params]
    (let [routes ["" (b/routes router)]]
