@@ -21,12 +21,9 @@
 (defrecord Ragtime [path db-spec datastore migrations]
   c/Lifecycle
   (start [this]
-    (let [source (search-source this)]
-      (if (and path source)
-        (let [datastore  (ragtime.j/sql-database source)
-              migrations (ragtime.j/load-resources path)]
-          (assoc this :datastore datastore :migrations migrations))
-        this)))
+    (let [datastore  (ragtime.j/sql-database (search-source this))
+          migrations (ragtime.j/load-resources path)]
+      (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
     (assoc this :datastore nil :migrations nil)))
 
@@ -35,11 +32,9 @@
   (map->Ragtime config))
 
 (defn migrate!
-  [{:keys [datastore migrations] :as ragtime}]
-  (when (and datastore migrations)
-    (ragtime.r/migrate ragtime)))
+  [ragtime]
+  (ragtime.r/migrate ragtime))
 
 (defn rollback!
-  [{:keys [datastore migrations] :as ragtime}]
-  (when (and datastore migrations)
-    (ragtime.r/rollback ragtime)))
+  [ragtime]
+  (ragtime.r/rollback ragtime))
