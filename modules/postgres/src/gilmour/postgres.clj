@@ -32,13 +32,15 @@
 
 (defn create!
   [{:keys [pool-spec]}]
-  (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
-    (let [db-name (:database-name pool-spec)]
-      (j/execute conn (str "DROP DATABASE IF EXISTS " db-name))
-      (j/execute conn (str "CREATE DATABASE " db-name)))))
+  (when pool-spec
+    (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
+      (let [db-name (:database-name pool-spec)]
+        (j/execute conn (str "DROP DATABASE IF EXISTS " db-name))
+        (j/execute conn (str "CREATE DATABASE " db-name))))))
 
 (defn destroy!
   [{:keys [pool-spec]}]
-  (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
-    (let [db-name (:database-name pool-spec)]
-      (j/execute conn (str "DROP DATABASE " db-name)))))
+  (when pool-spec
+    (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
+      (let [db-name (:database-name pool-spec)]
+        (j/execute conn (str "DROP DATABASE " db-name))))))
