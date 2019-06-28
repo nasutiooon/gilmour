@@ -1,4 +1,4 @@
-(defproject gilmour "0.1.6"
+(defproject gilmour "0.1.7"
   :description "Collection of component"
   :url "https://github.com/nasutiooon/gilmour"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
