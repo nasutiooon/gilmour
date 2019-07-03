@@ -5,12 +5,6 @@
    [datomic.api :as d]
    [io.rkn.conformity :refer [ensure-conforms]]))
 
-(defprotocol DatomicBlueprint
-  (uri [this]))
-
-(defprotocol Datomic
-  (conn [this]))
-
 (defrecord EphemeralDatomic [uri]
   c/Lifecycle
   (start [this]
@@ -18,12 +12,9 @@
     this)
   (stop [this]
     (d/delete-database uri)
-    this)
+    this))
 
-  DatomicBlueprint
-  (uri [_] uri))
-
-(defn make-ephemeral-datomic
+(defn ephemeral-datomic
   [config]
   (map->EphemeralDatomic config))
 
@@ -33,43 +24,37 @@
     (d/create-database uri)
     this)
   (stop [this]
-    this)
+    this))
 
-  DatomicBlueprint
-  (uri [_] uri))
-
-(defn make-durable-datomic
+(defn durable-datomic
   [config]
   (map->DurableDatomic config))
 
-(defn make-datomic
+(defn datomic
   [{:keys [temporary?] :as config}]
   (if temporary?
-    (make-ephemeral-datomic config)
-    (make-durable-datomic config)))
+    (ephemeral-datomic config)
+    (durable-datomic config)))
 
 (defn- search-uri
   [component]
-  (->> (vals component)
-       (filter (partial satisfies? DatomicBlueprint))
-       (map uri)
-       (first)))
+  (or (->> (vals component)
+           (filter #(or (instance? EphemeralDatomic %)
+                        (instance? DurableDatomic %)))
+           (map :uri)
+           (first))
+      (throw (ex-info "Datomic connection requires a blueprint" {}))))
 
 (defrecord DatomicConnection [conn]
   c/Lifecycle
   (start [this]
-    (let [uri (or (search-uri this)
-                  (throw
-                   (ex-info "Datomic connection requires a blueprint" {})))]
+    (let [uri (search-uri this)]
       (assoc this :conn (d/connect uri))))
   (stop [this]
     (when conn (d/release conn))
-    (assoc this :conn nil))
+    (assoc this :conn nil)))
 
-  Datomic
-  (conn [_] conn))
-
-(defn make-datomic-connection
+(defn datomic-connection
   []
   (map->DatomicConnection {}))
 
@@ -81,17 +66,17 @@
   (stop [this]
     (assoc this :norm-map nil)))
 
-(defn make-datomic-conformer
+(defn datomic-conformer
   [config]
   (map->DatomicConformer config))
 
 (defn- search-conn
   [component]
   (->> (vals component)
-       (filter (partial satisfies? Datomic))
-       (map conn)
+       (filter (partial instance? DatomicConnection))
+       (map :conn)
        (first)))
 
-(defn conform
+(defn conform!
   [{:keys [norm-map] :as datomic}]
   (ensure-conforms (search-conn datomic) norm-map))
