@@ -1,17 +1,19 @@
-(ns gilmour.bidi.core
+(ns gilmour.bidi
   (:require
    [bidi.bidi :as b]
    [bidi.ring :refer [make-handler]]
    [com.stuartsierra.component :as c]
-   [gilmour.bidi.proto :as b.proto]
-   [gilmour.ring.core :as g.ring]
+   [gilmour.ring :as g.ring]
    [ring.util.http-response :as res]))
+
+(defprotocol ResourceProvider
+  (resources [this]))
 
 (defn- search-hooks
   [component]
   (or (->> (vals component)
            (filter (partial satisfies? b/RouteProvider))
-           (filter (partial satisfies? b.proto/ResourceProvider)))
+           (filter (partial satisfies? ResourceProvider)))
       (throw (ex-info "bidi router requires a hook" {}))))
 
 (defrecord Router [request-routes request-resources not-found-handler handler]
@@ -25,7 +27,7 @@
                              (map b/routes)
                              (reduce merge {}))
           req-resources (->> hooks
-                             (map b.proto/resources)
+                             (map resources)
                              (reduce merge {}))]
       (assoc this :request-routes req-routes :request-resources req-resources)))
   (stop [this]
@@ -45,7 +47,7 @@
   b/RouteProvider
   (routes [_] routes)
 
-  b.proto/ResourceProvider
+  ResourceProvider
   (resources [_] resources))
 
 (defn resources-hook
