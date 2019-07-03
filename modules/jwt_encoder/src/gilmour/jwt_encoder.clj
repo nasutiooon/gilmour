@@ -15,7 +15,7 @@
   (decode [_ data]
     (jwt/unsign data secret {:alg algorithm})))
 
-(defn make-sha-signer
+(defn sha-signer
   [config]
   (map->SHASigner config))
 
@@ -36,7 +36,7 @@
   (stop [this]
     (assoc this :public-key nil :private-key nil)))
 
-(defn make-asymetric-signer
+(defn asymetric-signer
   [config]
   (map->AsymetricSigner config))
 
@@ -46,11 +46,11 @@
 (def asymetric-signer-algs
   #{:es256 :es512 :ps256 :ps512 :rs256 :rs512})
 
-(defn make-jwt-encoder
+(defn jwt-encoder
   [{:keys [algorithm] :as config}]
   (cond
     (sha-signer-algs algorithm)
-    (make-sha-signer config)
+    (sha-signer config)
 
     (asymetric-signer-algs algorithm)
-    (make-asymetric-signer config)))
+    (asymetric-signer config)))
