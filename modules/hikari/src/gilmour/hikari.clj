@@ -16,6 +16,6 @@
   (pool [_] datasource)
   (pool-spec [_] pool-spec))
 
-(defn make-hikari
+(defn hikari
   [config]
   (map->Hikari config))
