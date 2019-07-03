@@ -1,26 +1,18 @@
-(ns gilmour.bidi
+(ns gilmour.bidi.core
   (:require
    [bidi.bidi :as b]
    [bidi.ring :refer [make-handler]]
    [com.stuartsierra.component :as c]
-   [gilmour.ring :as g.ring]
-   [ring.util.http-response :refer [not-found]]))
-
-(defprotocol ResourceProvider
-  (resources [this]))
+   [gilmour.bidi.proto :as b.proto]
+   [gilmour.ring.core :as g.ring]
+   [ring.util.http-response :as res]))
 
 (defn- search-hooks
   [component]
-  (->> (vals component)
-       (filter (partial satisfies? b/RouteProvider))
-       (filter (partial satisfies? ResourceProvider))))
-
-(defn search-middleware
-  [component]
-  (->> (vals component)
-       (filter (partial satisfies? g.ring/RequestMiddleware))
-       (map g.ring/request-middleware)
-       (apply comp)))
+  (or (->> (vals component)
+           (filter (partial satisfies? b/RouteProvider))
+           (filter (partial satisfies? b.proto/ResourceProvider)))
+      (throw (ex-info "bidi router requires a hook" {}))))
 
 (defrecord Router [request-routes request-resources not-found-handler handler]
   b/RouteProvider
@@ -28,18 +20,12 @@
 
   c/Lifecycle
   (start [this]
-    (let [hooks         (or (search-hooks this)
-                            (throw (ex-info "Bidi router requires a hook" {})))
+    (let [hooks         (search-hooks this)
           req-routes    (->> hooks
                              (map b/routes)
                              (reduce merge {}))
           req-resources (->> hooks
-                             (map (juxt search-middleware resources))
-                             (map (fn [[mdw rscs]]
-                                    (reduce-kv (fn [m k rsc]
-                                                 (assoc m k (mdw rsc)))
-                                               {}
-                                               rscs)))
+                             (map b.proto/resources)
                              (reduce merge {}))]
       (assoc this :request-routes req-routes :request-resources req-resources)))
   (stop [this]
@@ -51,20 +37,20 @@
      (make-handler ["" request-routes] request-resources)
      (or not-found-handler (constantly (not-found))))))
 
-(defn make-router
+(defn router
   [config]
   (map->Router config))
 
-(defrecord ResourceHooks [routes resources]
+(defrecord ResourcesHook [routes resources]
   b/RouteProvider
   (routes [_] routes)
 
-  ResourceProvider
+  b.proto/ResourceProvider
   (resources [_] resources))
 
-(defn make-resource-hooks
+(defn resources-hook
   [config]
-  (map->ResourceHooks config))
+  (map->ResourcesHook config))
 
 (defn path-for
   ([router handler route-params]
