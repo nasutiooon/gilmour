@@ -2,7 +2,7 @@
   (:require
    [aleph.http :refer [start-server]]
    [com.stuartsierra.component :as c]
-   [gilmour.ring :as g.ring]))
+   [gilmour.ring.core :as g.ring]))
 
 (defn- search-handler
   [component]
