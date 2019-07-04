@@ -16,8 +16,11 @@
   clojure.lang.AFunction
   (request-handler [this] this))
 
-(defprotocol ExHandler
-  (ex-handlers [this]))
+(defprotocol RequestExHandler
+  (request-ex-handlers [this]))
+
+(defprotocol RequestBinding
+  (request-binding [this]))
 
 (defn- search-handler
   [component]
@@ -37,7 +40,13 @@
                           (filter (partial satisfies? RequestMiddleware))
                           (map request-middleware)
                           (apply comp))]
-      (middleware handler))))
+      (middleware
+       (fn [request]
+         (let [bindings (->> (vals this)
+                             (filter (partial satisfies? RequestBinding))
+                             (map request-binding)
+                             (reduce (partial merge-with merge) {}))]
+           (handler (merge request bindings))))))))
 
 (defn ring-head
   []
@@ -74,12 +83,11 @@
 (defrecord RingExManager []
   RequestHandler
   (request-handler [this]
-    (let [handler   (or
-                     (search-handler this)
-                     (throw (ex-info "ring ex manager requires a handler" {})))
+    (let [handler   (or (search-handler this)
+                        (throw (ex-info "ring ex manager requires a handler" {})))
           catalogue (->> (vals this)
-                         (filter (partial satisfies? ExHandler))
-                         (map ex-handlers)
+                         (filter (partial satisfies? RequestExHandler))
+                         (map request-ex-handlers)
                          (reduce merge {}))]
       (fn [request]
         (try
