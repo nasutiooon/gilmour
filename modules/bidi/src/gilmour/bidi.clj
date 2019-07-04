@@ -37,7 +37,7 @@
   (request-handler [_]
     (some-fn
      (make-handler ["" request-routes] request-resources)
-     (or not-found-handler (constantly (not-found))))))
+     (or not-found-handler (constantly (res/not-found))))))
 
 (defn router
   [config]
