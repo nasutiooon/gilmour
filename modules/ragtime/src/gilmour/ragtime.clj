@@ -16,7 +16,8 @@
            (filter (partial satisfies? g.sql/SQLDb))
            (map g.sql/db-spec)
            (first))
-      (:db-spec component)))
+      (:db-spec component)
+      (or (throw (ex-info "need an active datasource or a db spec" {})))))
 
 (defrecord Ragtime [migration-path db-spec datastore migrations]
   c/Lifecycle
@@ -27,7 +28,7 @@
   (stop [this]
     (assoc this :datastore nil :migrations nil)))
 
-(defn make-ragtime
+(defn ragtime
   [config]
   (map->Ragtime config))
 
@@ -38,3 +39,21 @@
 (defn rollback!
   [ragtime]
   (ragtime.r/rollback ragtime))
+
+(defn- search-ragtime
+  [component]
+  (->> (vals component)
+       (filter (partial instance? Ragtime))
+       (first)))
+
+(defrecord RagtimeRunner []
+  c/Lifecycle
+  (start [this]
+    (migrate! (search-ragtime this))
+    this)
+  (stop [this]
+    this))
+
+(defn ragtime-runner
+  []
+  (map->RagtimeRunner {}))
