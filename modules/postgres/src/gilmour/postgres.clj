@@ -5,7 +5,7 @@
 
 (defrecord Postgres [])
 
-(defn make-postgres
+(defn postgres
   []
   (map->Postgres {}))
 
@@ -26,7 +26,7 @@
 
 (defrecord PostgresGenerator [pool-spec])
 
-(defn make-postgres-generator
+(defn postgres-generator
   [config]
   (map->PostgresGenerator config))
 
