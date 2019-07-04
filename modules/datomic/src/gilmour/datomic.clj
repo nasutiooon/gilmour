@@ -80,3 +80,21 @@
 (defn conform!
   [{:keys [norm-map] :as datomic}]
   (ensure-conforms (search-conn datomic) norm-map))
+
+(defn- search-datomic-conformer
+  [component]
+  (->> (vals component)
+       (filter (partial instance? DatomicConformer))
+       (first)))
+
+(defrecord DatomicConformerRunner []
+  c/Lifecycle
+  (start [this]
+    (conform! (search-datomic-conformer this))
+    this)
+  (stop [this]
+    this))
+
+(defn datomic-conformer-runner
+  []
+  (map->DatomicConformerRunner {}))
