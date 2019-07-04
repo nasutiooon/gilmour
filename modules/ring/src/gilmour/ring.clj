@@ -21,17 +21,17 @@
 
 (defn- search-handler
   [component]
-  (->> (vals component)
-       (filter (partial satisfies? RequestHandler))
-       (map request-handler)
-       (first)))
+  (or (when-let [handler (:handler component)]
+        (request-handler handler))
+      (->> (vals component)
+           (filter (partial satisfies? RequestHandler))
+           (map request-handler)
+           (first))))
 
 (defrecord RingHead []
   RequestHandler
   (request-handler [this]
-    (let [handler    (or (when-let [handler (:handler this)]
-                           (request-handler handler))
-                         (search-handler this)
+    (let [handler    (or (search-handler this)
                          (throw (ex-info "ring head requires a handler" {})))
           middleware (->> (vals this)
                           (filter (partial satisfies? RequestMiddleware))
@@ -39,7 +39,7 @@
                           (apply comp))]
       (middleware handler))))
 
-(defn make-ring-head
+(defn ring-head
   []
   (map->RingHead {}))
 
@@ -67,17 +67,16 @@
   (request-middleware [this]
     (compose this entries)))
 
-(defn make-ring-middleware
+(defn ring-middleware
   [config]
   (map->RingMiddleware config))
 
-(defrecord ExceptionManager []
+(defrecord RingExManager []
   RequestHandler
   (request-handler [this]
-    (let [handler   (or (when-let [handler (:handler this)]
-                          (request-handler handler))
-                        (search-handler this)
-                        (throw (ex-info "ring head requires a handler" {})))
+    (let [handler   (or
+                     (search-handler this)
+                     (throw (ex-info "ring ex manager requires a handler" {})))
           catalogue (->> (vals this)
                          (filter (partial satisfies? ExHandler))
                          (map ex-handlers)
@@ -94,6 +93,6 @@
                 (ex-handler e request)
                 (throw e)))))))))
 
-(defn make-exception-manager
+(defn ring-ex-manager
   []
-  (map->ExceptionManager {}))
+  (map->RingExManager {}))
