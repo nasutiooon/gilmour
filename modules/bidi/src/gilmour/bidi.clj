@@ -11,10 +11,9 @@
 
 (defn- search-hooks
   [component]
-  (or (->> (vals component)
-           (filter (partial satisfies? b/RouteProvider))
-           (filter (partial satisfies? ResourceProvider)))
-      (throw (ex-info "bidi router requires a hook" {}))))
+  (->> (vals component)
+       (filter (partial satisfies? b/RouteProvider))
+       (filter (partial satisfies? ResourceProvider))))
 
 (defrecord Router [request-routes request-resources not-found-handler handler]
   b/RouteProvider
@@ -22,7 +21,8 @@
 
   c/Lifecycle
   (start [this]
-    (let [hooks         (search-hooks this)
+    (let [hooks         (or (search-hooks this)
+                            (throw (ex-info "router requires a resources hook" {})))
           req-routes    (->> hooks
                              (map b/routes)
                              (reduce merge {}))

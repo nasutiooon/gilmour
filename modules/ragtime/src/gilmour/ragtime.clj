@@ -16,13 +16,14 @@
            (filter (partial satisfies? g.sql/SQLDb))
            (map g.sql/db-spec)
            (first))
-      (:db-spec component)
-      (or (throw (ex-info "need an active datasource or a db spec" {})))))
+      (:db-spec component)))
 
 (defrecord Ragtime [migration-path db-spec datastore migrations]
   c/Lifecycle
   (start [this]
-    (let [datastore  (ragtime.j/sql-database (search-source this))
+    (let [source     (or (search-source this)
+                         (throw (ex-info "ragtime requires an active datasource or a db spec" {})))
+          datastore  (ragtime.j/sql-database source)
           migrations (ragtime.j/load-resources migration-path)]
       (assoc this :datastore datastore :migrations migrations)))
   (stop [this]
@@ -49,7 +50,9 @@
 (defrecord RagtimeRunner []
   c/Lifecycle
   (start [this]
-    (migrate! (search-ragtime this))
+    (migrate!
+     (or (search-ragtime this)
+         (throw (ex-info "ragtime runner requires ragtime instance" {}))))
     this)
   (stop [this]
     this))

@@ -38,17 +38,17 @@
 
 (defn- search-uri
   [component]
-  (or (->> (vals component)
-           (filter #(or (instance? EphemeralDatomic %)
-                        (instance? DurableDatomic %)))
-           (map :uri)
-           (first))
-      (throw (ex-info "Datomic connection requires a blueprint" {}))))
+  (->> (vals component)
+       (filter #(or (instance? EphemeralDatomic %)
+                    (instance? DurableDatomic %)))
+       (map :uri)
+       (first)))
 
 (defrecord DatomicConnection [conn]
   c/Lifecycle
   (start [this]
-    (let [uri (search-uri this)]
+    (let [uri (or (search-uri this)
+                  (throw (ex-info "datomic conn requires a blueprint" {})))]
       (assoc this :conn (d/connect uri))))
   (stop [this]
     (when conn (d/release conn))
@@ -79,7 +79,10 @@
 
 (defn conform!
   [{:keys [norm-map] :as datomic}]
-  (ensure-conforms (search-conn datomic) norm-map))
+  (ensure-conforms
+   (or (search-conn datomic)
+       (throw (ex-info "conforming requires a datomic conn" {})))
+   norm-map))
 
 (defn- search-datomic-conformer
   [component]
@@ -90,7 +93,9 @@
 (defrecord DatomicConformerRunner []
   c/Lifecycle
   (start [this]
-    (conform! (search-datomic-conformer this))
+    (conform!
+     (or (search-datomic-conformer this)
+         (throw (ex-info "datomic conformer runner requires a datomic conformer" {}))))
     this)
   (stop [this]
     this))

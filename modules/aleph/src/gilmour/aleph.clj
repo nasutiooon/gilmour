@@ -11,13 +11,13 @@
       (->> (vals component)
            (filter (partial satisfies? g.ring/RequestHandler))
            (map g.ring/request-handler)
-           (first))
-      (throw (ex-info "aleph http server requires a handler" {}))))
+           (first))))
 
 (defrecord HttpServer [server]
   c/Lifecycle
   (start [this]
-    (let [handler (search-handler this)
+    (let [handler (or (search-handler this)
+                      (throw (ex-info "aleph http server requires a handler" {})))
           server  (start-server handler this)]
       (assoc this :server server)))
   (stop [this]
