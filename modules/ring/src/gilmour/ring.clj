@@ -16,9 +16,6 @@
   clojure.lang.AFunction
   (request-handler [this] this))
 
-(defprotocol RequestExHandler
-  (request-ex-handlers [this]))
-
 (defprotocol RequestBinding
   (request-binding [this]))
 
@@ -79,28 +76,3 @@
 (defn ring-middleware
   [config]
   (map->RingMiddleware config))
-
-(defrecord RingExManager []
-  RequestHandler
-  (request-handler [this]
-    (let [handler   (or (search-handler this)
-                        (throw (ex-info "ring ex manager requires a handler" {})))
-          catalogue (->> (vals this)
-                         (filter (partial satisfies? RequestExHandler))
-                         (map request-ex-handlers)
-                         (reduce merge {}))]
-      (fn [request]
-        (try
-          (handler request)
-          (catch Exception e
-            (let [kind       (if (instance? clojure.lang.ExceptionInfo e)
-                               (-> e ex-data :kind)
-                               (type e))
-                  ex-handler (get catalogue kind)]
-              (if ex-handler
-                (ex-handler e request)
-                (throw e)))))))))
-
-(defn ring-ex-manager
-  []
-  (map->RingExManager {}))
