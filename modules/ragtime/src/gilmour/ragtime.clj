@@ -40,23 +40,3 @@
 (defn rollback!
   [ragtime]
   (ragtime.r/rollback ragtime))
-
-(defn- search-ragtime
-  [component]
-  (->> (vals component)
-       (filter (partial instance? Ragtime))
-       (first)))
-
-(defrecord RagtimeRunner []
-  c/Lifecycle
-  (start [this]
-    (migrate!
-     (or (search-ragtime this)
-         (throw (ex-info "ragtime runner requires ragtime instance" {}))))
-    this)
-  (stop [this]
-    this))
-
-(defn ragtime-runner
-  []
-  (map->RagtimeRunner {}))
