@@ -5,4 +5,5 @@
   (pool-spec [this]))
 
 (defprotocol SQLDb
+  (db [this])
   (db-spec [this]))
