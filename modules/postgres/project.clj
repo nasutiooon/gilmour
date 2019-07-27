@@ -1,4 +1,4 @@
-(defproject gilmour/postgres "0.1.3"
+(defproject gilmour/postgres "0.1.4"
   :description "Postgres as component"
   :url "https://github.com/nasutiooon/gilmour/tree/master/modules/postgres"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"

@@ -1,44 +1,79 @@
 (ns gilmour.postgres
   (:require
+   [com.stuartsierra.component :as c]
    [gilmour.sql :as g.sql]
    [jdbc.core :as j]))
 
-(defrecord Postgres [])
+(defrecord PGPool []
+  g.sql/SQLPool
+  (pool [this]
+    (->> (vals this)
+         (filter (partial satisfies? g.sql/SQLPool))
+         (map g.sql/pool)
+         (first)))
+  (pool-spec [this]
+    (->> (vals this)
+         (filter (partial satisfies? g.sql/SQLPool))
+         (map g.sql/pool-spec)
+         (first))))
 
-(defn postgres
+(defn pg-pool
   []
-  (map->Postgres {}))
+  (map->PGPool {}))
 
 (defn error-code
   [ex]
   (.getSQLState (.getServerErrorMessage ex)))
 
-(defn pool-spec->db-spec
+(defn db-spec
   [{:keys [adapter server-name port-number database-name username password]}]
   (cond-> {:subprotocol adapter
            :subname     (str "//" server-name ":" port-number "/" database-name)}
     username (assoc :user username)
     password (assoc :password password)))
 
-(defn pool-spec->postgres-db-spec
+(defn pg-db-spec
   [spec]
-  (pool-spec->db-spec (assoc spec :database-name "postgres")))
+  (db-spec (assoc spec :database-name "postgres")))
 
-(defrecord PostgresGenerator [pool-spec])
+(defrecord DurablePGGenerator [pool-spec]
+  c/Lifecycle
+  (start [this]
+    (with-open [conn (j/connection (pg-db-spec pool-spec))]
+      (let [db-name (:database-name pool-spec)]
+        (when (nil? (j/fetch-one conn (str "SELECT datname "
+                                           "FROM pg_catalog.pg_database "
+                                           "WHERE datname = '"
+                                           db-name
+                                           "'")))
+          (j/execute conn (str "CREATE DATABASE " db-name)))
+        this)))
+  (stop [this]
+    this))
 
-(defn postgres-generator
+(defn durable-pg-generator
   [config]
-  (map->PostgresGenerator config))
+  (map->DurablePGGenerator config))
 
-(defn create!
-  [{:keys [pool-spec]}]
-  (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
-    (let [db-name (:database-name pool-spec)]
-      (j/execute conn (str "DROP DATABASE IF EXISTS " db-name))
-      (j/execute conn (str "CREATE DATABASE " db-name)))))
+(defrecord EphemeralPGGenerator [pool-spec]
+  c/Lifecycle
+  (start [this]
+    (with-open [conn (j/connection (pg-db-spec pool-spec))]
+      (let [db-name (:database-name pool-spec)]
+        (j/execute conn (str "DROP DATABASE IF EXISTS " db-name))
+        (j/execute conn (str "CREATE DATABASE " db-name)))
+      this))
+  (stop [this]
+    (with-open [conn (j/connection (pg-db-spec pool-spec))]
+      (j/execute conn (str "DROP DATABASE " (:database-name pool-spec)))
+      this)))
 
-(defn destroy!
-  [{:keys [pool-spec]}]
-  (with-open [conn (j/connection (pool-spec->postgres-db-spec pool-spec))]
-    (let [db-name (:database-name pool-spec)]
-      (j/execute conn (str "DROP DATABASE " db-name)))))
+(defn ephemeral-pg-generator
+  [config]
+  (map->EphemeralPGGenerator config))
+
+(defn pg-generator
+  [{:keys [temporary?] :as config}]
+  (if temporary?
+    (ephemeral-pg-generator config)
+    (durable-pg-generator config)))
