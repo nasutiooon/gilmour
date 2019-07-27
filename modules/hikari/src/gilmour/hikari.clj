@@ -13,7 +13,7 @@
     (assoc this :datasource nil))
 
   g.sql/SQLPool
-  (pool [_] datasource)
+  (pool [_] {:datasource datasource})
   (pool-spec [_] pool-spec))
 
 (defn hikari
