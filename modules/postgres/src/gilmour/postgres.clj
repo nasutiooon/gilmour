@@ -37,6 +37,10 @@
 
 (defrecord PGGenerator [db-spec])
 
+(defn pg-generator
+  [config]
+  (map->PGGenerator config))
+
 (defn create!
   [{:keys [db-spec]}]
   (with-open [conn (j/connection (pg-db-spec db-spec))]
