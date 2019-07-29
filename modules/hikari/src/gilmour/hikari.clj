@@ -12,9 +12,8 @@
     (when datasource (hikari/close-datasource datasource))
     (assoc this :datasource nil))
 
-  g.sql/SQLPool
-  (pool [_] {:datasource datasource})
-  (pool-spec [_] pool-spec))
+  g.sql/SQLDb
+  (db-spec [_] {:datasource datasource}))
 
 (defn hikari
   [config]
