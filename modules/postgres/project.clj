@@ -9,5 +9,4 @@
   :parent-project {:path    "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :profiles {:dev {:dependencies [[org.clojure/clojure]
-                                  [com.stuartsierra/component]
                                   [gilmour/sql]]}})

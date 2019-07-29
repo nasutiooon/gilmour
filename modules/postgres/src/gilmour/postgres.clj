@@ -1,7 +1,6 @@
 (ns gilmour.postgres
   (:require
    [clojure.string :as string]
-   [com.stuartsierra.component :as c]
    [gilmour.sql :as g.sql]
    [jdbc.core :as j]))
 
